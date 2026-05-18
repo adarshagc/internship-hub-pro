@@ -85,7 +85,8 @@ public class MentorController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User mentor = userRepository.findById(userDetails.getId()).orElseThrow();
         announcement.setCreatedBy(mentor);
-        return ResponseEntity.ok(announcementRepository.save(announcement));
+        announcementRepository.save(announcement);
+        return ResponseEntity.ok(java.util.Map.of("message", "Announcement published successfully"));
     }
 
     

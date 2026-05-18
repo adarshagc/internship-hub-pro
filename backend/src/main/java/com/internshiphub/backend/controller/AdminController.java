@@ -73,7 +73,8 @@ public class AdminController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User admin = userRepository.findById(userDetails.getId()).orElseThrow();
         announcement.setCreatedBy(admin);
-        return ResponseEntity.ok(announcementRepository.save(announcement));
+        announcementRepository.save(announcement);
+        return ResponseEntity.ok(Map.of("message", "Announcement published successfully"));
     }
 
     

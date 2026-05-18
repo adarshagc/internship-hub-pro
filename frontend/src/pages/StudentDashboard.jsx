@@ -1,9 +1,23 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Award, BookOpen, Clock, FileText } from 'lucide-react';
+import api from '../services/api';
 
 const StudentDashboard = () => {
   const { user } = useContext(AuthContext);
+  const [announcements, setAnnouncements] = useState([]);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await api.get('/users/announcements');
+        setAnnouncements(res.data);
+      } catch (err) {
+        console.error("Failed to fetch announcements", err);
+      }
+    };
+    fetchAnnouncements();
+  }, []);
 
   const stats = [
     { label: 'Completed Assignments', value: '0', icon: <FileText size={24} className="text-blue-400" /> },
@@ -36,7 +50,21 @@ const StudentDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <h2 className="text-xl font-semibold mb-4">Recent Announcements</h2>
-          <div className="text-slate-400 italic">No announcements yet.</div>
+          {announcements.length > 0 ? (
+            <div className="space-y-4">
+              {announcements.slice(0, 5).map((ann, i) => (
+                <div key={i} className="p-4 bg-slate-900 border border-slate-700 rounded-lg">
+                  <h3 className="font-semibold text-emerald-400">{ann.title}</h3>
+                  <p className="text-sm text-slate-300 mt-1">{ann.content}</p>
+                  <p className="text-xs text-slate-500 mt-2">
+                    {new Date(ann.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-slate-400 italic">No announcements yet.</div>
+          )}
         </div>
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <h2 className="text-xl font-semibold mb-4">Upcoming Deadlines</h2>

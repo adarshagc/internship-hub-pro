@@ -16,6 +16,19 @@ import java.util.Optional;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final com.internshiphub.backend.repository.AnnouncementRepository announcementRepository;
+
+    @GetMapping("/announcements")
+    public ResponseEntity<java.util.List<com.internshiphub.backend.entity.Announcement>> getAnnouncements(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String role = userDetails.getAuthorities().stream().findFirst().get().getAuthority().replace("ROLE_", "");
+        
+        java.util.List<com.internshiphub.backend.entity.Announcement> announcements = announcementRepository.findAll().stream()
+                .filter(a -> a.getTargetRole().equals("ALL") || a.getTargetRole().equals(role))
+                .sorted((a1, a2) -> a2.getCreatedAt().compareTo(a1.getCreatedAt()))
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(announcements);
+    }
 
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(Authentication authentication) {
@@ -54,7 +67,8 @@ public class UserController {
 
     
     @org.springframework.beans.factory.annotation.Autowired
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, com.internshiphub.backend.repository.AnnouncementRepository announcementRepository) {
         this.userRepository = userRepository;
+        this.announcementRepository = announcementRepository;
     }
 }
